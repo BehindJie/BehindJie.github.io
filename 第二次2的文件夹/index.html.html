@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>业余无线电见面记录</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f7e6;
+            color: #333;
+            min-height: 100vh;
+            font-size: 16px;
+            line-height: 1.5;
+            -webkit-text-size-adjust: 100%;
+            touch-action: manipulation;
+        }
+        
+        /* 主容器 */
+        .main-container {
+            width: 100%;
+            padding: 15px;
+            background-color: #fff;
+            margin: 0 auto;
+            border-radius: 12px;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
+            max-width: 100%;
+        }
+        
+        /* 头部标题 */
+        .header {
+            text-align: center;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .header h1 {
+            font-size: 1.4rem;
+            margin: 0 0 5px 0;
+            color: #1a3e72;
+            font-weight: 600;
+        }
+        
+        .header .subtitle {
+            font-size: 0.9rem;
+            color: #666;
+            margin: 0;
+        }
+        
+        .header .logo {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin: 10px 0 0 0;
+            color: #1a3e72;
+        }
+        
+        /* 呼号输入对话框 */
+        .call-sign-dialog {
+            background: #fff;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        
+        .dialog-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #1a3e72;
+        }
+        
+        .dialog-description {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        
+        .call-sign-input {
+            width: 100%;
+            padding: 12px 15px;
+            font-size: 1.1rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            background: #f9f9f9;
+            -webkit-appearance: none;
+        }
+        
+        .button-group {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .btn {
+            padding: 12px 0;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            border: none;
+            flex: 1;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .btn-cancel {
+            background: #f5f5f5;
+            color: #666;
+        }
+        
+        .btn-cancel:active {
+            background: #e0e0e0;
+        }
+        
+        .btn-submit {
+            background: #1a3e72;
+            color: white;
+        }
+        
+        .btn-submit:active {
+            background: #0d2b5a;
+        }
+        
+        /* 虚拟键盘样式 - 手机优化 */
+        .virtual-keyboard {
+            margin-top: 15px;
+            width: 100%;
+        }
+        
+        .keyboard-row {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 6px;
+            width: 100%;
+            gap: 4px;
+        }
+        
+        .keyboard-key {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 48px;
+            min-width: 8%;
+            flex: 1;
+            background: #f5f5f5;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 1.1rem;
+            user-select: none;
+            transition: all 0.1s;
+            touch-action: manipulation;
+        }
+        
+        .keyboard-key:active {
+            background: #e0e0e0;
+            transform: scale(0.96);
+        }
+        
+        .keyboard-key.wide {
+            flex: 1.5;
+        }
+        
+        /* 记录内容 */
+        .record-content {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 12px;
+            font-size: 0.95rem;
+        }
+        
+        .record-content h3 {
+            margin-top: 0;
+            color: #1a3e72;
+        }
+        
+        /* 音乐播放器 - 已优化 */
+        .music-control {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #1a3e72;
+            color: white;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 100;
+            font-size: 1.4rem;
+            transition: all 0.2s;
+            touch-action: manipulation;
+        }
+        
+        .music-control.playing {
+            background: #2a4e8a;
+        }
+        
+        .music-control:active {
+            transform: scale(0.95);
+        }
+        
+        /* 手机横屏适配 */
+        @media (max-width: 768px) and (orientation: landscape) {
+            .keyboard-key {
+                height: 40px;
+                font-size: 1rem;
+            }
+            
+            .main-container {
+                max-width: 90%;
+                margin: 10px auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="header">
+            <h1>中华人民共和国个人业余无线电台</h1>
+            <div class="subtitle">PERSONAL AMATEUR RADIO</div>
+        </div>
+        
+        <!-- 呼号输入对话框 -->
+        <div class="call-sign-dialog" id="callSignDialog">
+            <div class="dialog-title">请输入您的呼号</div>
+            <div class="dialog-description">
+                我们需要您的呼号以记录这次来之不易的相见。<br>
+                未来此链接将与您和此次见面永久绑定。
+            </div>
+            
+            <input type="text" class="call-sign-input" id="callSignInput" 
+                   placeholder="例如:BI4OUO" maxlength="10" readonly>
+            
+            <div class="virtual-keyboard">
+                <div class="keyboard-row">
+                    <span class="keyboard-key">1</span>
+                    <span class="keyboard-key">2</span>
+                    <span class="keyboard-key">3</span>
+                    <span class="keyboard-key">4</span>
+                    <span class="keyboard-key">5</span>
+                    <span class="keyboard-key">6</span>
+                    <span class="keyboard-key">7</span>
+                    <span class="keyboard-key">8</span>
+                    <span class="keyboard-key">9</span>
+                    <span class="keyboard-key">0</span>
+                </div>
+                <div class="keyboard-row">
+                    <span class="keyboard-key">Q</span>
+                    <span class="keyboard-key">W</span>
+                    <span class="keyboard-key">E</span>
+                    <span class="keyboard-key">R</span>
+                    <span class="keyboard-key">T</span>
+                    <span class="keyboard-key">Y</span>
+                    <span class="keyboard-key">U</span>
+                    <span class="keyboard-key">I</span>
+                    <span class="keyboard-key">O</span>
+                    <span class="keyboard-key">P</span>
+                </div>
+                <div class="keyboard-row">
+                    <span class="keyboard-key">A</span>
+                    <span class="keyboard-key">S</span>
+                    <span class="keyboard-key">D</span>
+                    <span class="keyboard-key">F</span>
+                    <span class="keyboard-key">G</span>
+                    <span class="keyboard-key">H</span>
+                    <span class="keyboard-key">J</span>
+                    <span class="keyboard-key">K</span>
+                    <span class="keyboard-key">L</span>
+                </div>
+                <div class="keyboard-row">
+                    <span class="keyboard-key">Z</span>
+                    <span class="keyboard-key">X</span>
+                    <span class="keyboard-key">C</span>
+                    <span class="keyboard-key">V</span>
+                    <span class="keyboard-key">B</span>
+                    <span class="keyboard-key">N</span>
+                    <span class="keyboard-key">M</span>
+                    <span class="keyboard-key wide" id="keyBackspace">←</span>
+                </div>
+            </div>
+            
+            <div class="button-group">
+                <button class="btn btn-cancel" id="btnCancel">取消</button>
+                <button class="btn btn-submit" id="btnSubmit">提交</button>
+            </div>
+        </div>
+        
+        <!-- 记录内容 - 初始隐藏 -->
+        <div class="record-content" id="recordContent">
+            <h3>与 <span id="displayCallSign">BI3PIE</span> 的特别见面记录</h3>
+            <p>文本 <span id="displayCallSign2">BI3PIE</span>，</p>
+            <p>文本</p>
+            <p>文本</p>
+            <p>文本</p>
+            <p style="text-align: right;">DE:BI4OUO
+            </p>
+            <p style="text-align: right;">73
+            </p>
+            
+            <div style="margin-top: 30px; text-align: center; color: #666; font-size: 0.8rem;">
+                cq.fz.do/special/lda3e-1xxxxx-541
+            </div>
+        </div>
+    </div>
+    
+    <!-- 音乐播放器 - 已修改为本地音乐 -->
+    <div class="music-control" id="musicControl" title="播放《Welcome Home, Son》">
+        ♫
+    </div>
+    
+    <!-- 修改点1：替换为本地音乐文件 -->
+    <audio id="bgMusic" loop>
+        <source src="Welcome Home Son.ogg" type="audio/mpeg">
+        您的浏览器不支持音频播放，建议使用Chrome/Firefox浏览器
+    </audio>
+    
+    <script>
+        // 获取DOM元素
+        const callSignInput = document.getElementById('callSignInput');
+        const btnCancel = document.getElementById('btnCancel');
+        const btnSubmit = document.getElementById('btnSubmit');
+        const recordContent = document.getElementById('recordContent');
+        const displayCallSign = document.getElementById('displayCallSign');
+        const displayCallSign2 = document.getElementById('displayCallSign2');
+        const musicControl = document.getElementById('musicControl');
+        const bgMusic = document.getElementById('bgMusic');
+        const keyBackspace = document.getElementById('keyBackspace');
+        
+        // 修改点2：音乐预加载（解决移动端限制）
+        document.addEventListener('DOMContentLoaded', function() {
+            bgMusic.volume = 0.3; // 设置默认音量
+            // 通过用户交互解锁音频
+            document.body.addEventListener('touchstart', function initAudio() {
+                bgMusic.load().catch(e => console.log("预加载:", e));
+                document.body.removeEventListener('touchstart', initAudio);
+            }, { once: true });
+        });
+        
+        // 虚拟键盘功能
+        const keyboardKeys = document.querySelectorAll('.keyboard-key:not(#keyBackspace)');
+        keyboardKeys.forEach(key => {
+            key.addEventListener('click', function() {
+                callSignInput.value += this.textContent;
+                callSignInput.focus();
+            });
+            
+            // 触摸反馈
+            key.addEventListener('touchstart', function() {
+                this.style.transform = 'scale(0.96)';
+                this.style.backgroundColor = '#e0e0e0';
+            });
+            
+            key.addEventListener('touchend', function() {
+                this.style.transform = 'scale(1)';
+                this.style.backgroundColor = '#f5f5f5';
+            });
+        });
+        
+        // 退格键功能
+        keyBackspace.addEventListener('click', function() {
+            callSignInput.value = callSignInput.value.slice(0, -1);
+            callSignInput.focus();
+        });
+        
+        keyBackspace.addEventListener('touchstart', function() {
+            this.style.transform = 'scale(0.96)';
+            this.style.backgroundColor = '#e0e0e0';
+        });
+        
+        keyBackspace.addEventListener('touchend', function() {
+            this.style.transform = 'scale(1)';
+            this.style.backgroundColor = '#f5f5f5';
+        });
+        
+        // 提交呼号
+        btnSubmit.addEventListener('click', function() {
+            const callSign = callSignInput.value.trim().toUpperCase();
+            
+            if (callSign) {
+                displayCallSign.textContent = callSign;
+                displayCallSign2.textContent = callSign;
+                document.getElementById('callSignDialog').style.display = 'none';
+                recordContent.style.display = 'block';
+                console.log('呼号已提交:', callSign);
+            } else {
+                alert('请输入您的呼号');
+            }
+        });
+        
+        // 取消按钮
+        btnCancel.addEventListener('click', function() {
+            if(confirm('确定要取消输入吗？')) {
+                callSignInput.value = '';
+            }
+        });
+        
+        // 修改点3：增强音乐控制逻辑
+        let isPlaying = false;
+        function toggleMusic() {
+            if (isPlaying) {
+                bgMusic.pause();
+                musicControl.textContent = '♫';
+                musicControl.classList.remove('playing');
+            } else {
+                bgMusic.play()
+                    .then(() => {
+                        musicControl.textContent = '❚❚';
+                        musicControl.classList.add('playing');
+                    })
+                    .catch(error => {
+                        console.error("播放失败:", error);
+                        musicControl.innerHTML = '▶<br><small>点击播放</small>';
+                        musicControl.style.fontSize = '0.9rem';
+                    });
+            }
+            isPlaying = !isPlaying;
+        }
+        
+        // 统一绑定事件
+        musicControl.addEventListener('click', toggleMusic);
+        musicControl.addEventListener('touchend', function(e) {
+            e.preventDefault();
+            toggleMusic();
+        });
+        
+        // 输入框自动大写
+        callSignInput.addEventListener('input', function() {
+            this.value = this.value.toUpperCase();
+        });
+        
+        // 阻止手机默认行为
+        document.addEventListener('touchmove', function(e) {
+            if (e.target.classList.contains('keyboard-key')) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+    </script>
+</body>
+</html>
